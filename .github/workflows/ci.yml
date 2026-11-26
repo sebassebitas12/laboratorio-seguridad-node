@@ -29,7 +29,7 @@ jobs:
       SESSION_SECRET: solo-para-pruebas-automaticas-no-usar-en-produccion
       DATA_ENCRYPTION_KEY: AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE=
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
