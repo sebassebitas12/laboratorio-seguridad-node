@@ -1,36 +1,49 @@
-# Laboratorio de seguridad con Node.js
+# Resguardo
 
-Proyecto académico independiente para aprender desarrollo seguro y despliegue.
-El nombre es provisional. Existe un servidor inicial; la aplicación de notas y
-sus controles de seguridad todavía no están implementados.
-
-## Objetivo
-
-Construir y verificar una aplicación de notas con autenticación, autorización,
-protección criptográfica y una base de datos, siguiendo el enunciado del curso.
-La plataforma prevista para la práctica es Railway Free, sujeta a verificar los
-límites del plan y la disponibilidad durante la evaluación.
+Práctica académica de notas privadas con Node.js, Express y MySQL. Es un
+proyecto independiente de Vértice CR.
 
 ## Estado
 
-- [x] Investigación preliminar de despliegue.
-- [x] Servidor inicial y ruta de salud del proceso.
-- [ ] Diseño de datos y modelo de amenazas.
-- [ ] Implementación y pruebas de la aplicación.
-- [ ] Configuración de CI y despliegue en Railway.
-- [ ] Comprobaciones de seguridad y documentación de evidencias reales.
+El código incluye registro, sesiones, notas privadas, perfil y panel de
+administración. Las pruebas locales se ejecutaron con MySQL aislado; el
+despliegue completo, el envío real de correo y los análisis externos de
+seguridad aún deben verificarse. `/health` solo indica que el proceso responde.
 
-El servidor inicial solo sirve para comprobar el arranque y la conectividad.
-La ruta `/health` no comprueba una base de datos. Las credenciales, llaves y
-archivos de entorno con valores reales no deben guardarse en el repositorio.
+## Uso local
 
-## Ejecución local
+1. Instalar Node.js 24 y MySQL 8.
+2. Crear una base de datos independiente para el laboratorio.
+3. Copiar `.env.example` a `.env` y configurar los valores. Nunca subir
+   `.env`, contraseñas, llaves ni credenciales al repositorio.
+4. Ejecutar `npm ci` y `npm start`. El servidor crea sus tablas en la base
+   configurada y escucha el puerto definido por `PORT`.
 
-Con Node.js 24 instalado, ejecutá `npm ci` y luego `npm start`. La dirección
-local predeterminada es `http://localhost:3000`; `/health` responde con el
-estado del proceso. Para revisar la sintaxis, ejecutá `npm run check`.
+`DATABASE_URL` tiene la forma `mysql://usuario:contraseña@host:puerto/base`;
+los caracteres especiales en usuario o contraseña se codifican para URL.
+`SESSION_SECRET` debe contener al menos 32 caracteres y
+`DATA_ENCRYPTION_KEY` debe ser una llave aleatoria de 32 bytes codificada en
+base64. Conservar la llave: si se pierde, los datos cifrados no se pueden leer.
+No compartirla junto a respaldos ni registrarla en consola pública.
 
-## Flujo previsto
+La recuperación por correo requiere configurar SMTP y `MAIL_FROM`. Mientras no
+se configure un servicio real, la solicitud responde que no está disponible.
+`APP_BASE_URL` debe ser la URL pública HTTPS real en producción.
+`DATABASE_SSL=true` habilita TLS verificando el certificado; en Railway puede
+usarse la red privada interna, según la configuración real.
 
-GitHub `main` → verificaciones de GitHub Actions → Railway → aplicación Node.js
-y base de datos. Este flujo se configurará y comprobará durante el laboratorio.
+Para habilitar el primer administrador, registrar una cuenta y ejecutar
+`node scripts/crear-administrador.js correo-de-la-cuenta` en un entorno con
+acceso a la base y las variables configuradas. No existen administradores ni
+credenciales predeterminadas.
+
+## Verificaciones
+
+`npm run check` comprueba sintaxis. `npm test` exige `NODE_ENV=test`, un
+MySQL local independiente llamado `lab_test` y variables de prueba; no lo
+ejecutés contra datos reales. GitHub Actions propone un servicio temporal MySQL
+para correr esas pruebas y auditar dependencias. Railway debe configurarse para
+esperar a CI: agregar el flujo por sí solo no activa esa espera.
+
+El informe de seguridad y las pruebas en producción están en `docs/`; las
+evidencias no ejecutadas se identifican como pendientes.
