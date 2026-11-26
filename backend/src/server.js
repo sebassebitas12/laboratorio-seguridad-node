@@ -8,6 +8,7 @@ const nodemailer = require('nodemailer');
 const { loadConfig } = require('./config');
 const { createPool, migrate } = require('./db');
 const { installRoutes } = require('./routes');
+const clientDirectory = path.resolve(__dirname, '../../frontend/dist');
 
 function createApp({ config, pool, mailTransport }) {
   const app = express();
@@ -55,8 +56,8 @@ function createApp({ config, pool, mailTransport }) {
     message: { error: 'Demasiados intentos. Intentá más tarde.' } }));
   app.get('/health', (req, res) => res.json({ status: 'ok' }));
   installRoutes(app, { config, pool, mailTransport });
-  app.use(express.static(path.join(__dirname, '..', 'public'), { index: 'index.html' }));
-  app.get('/reset', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'index.html')));
+  app.use(express.static(clientDirectory, { index: 'index.html' }));
+  app.get('/reset', (req, res) => res.sendFile(path.join(clientDirectory, 'index.html')));
   app.use((req, res) => res.status(404).json({ error: 'No encontrado.' }));
   app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     const status = err.status === 400 || err.status === 413 ? err.status : 500;

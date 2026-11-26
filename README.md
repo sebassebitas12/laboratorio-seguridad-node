@@ -1,49 +1,89 @@
 # Resguardo
 
-Práctica académica de notas privadas con Node.js, Express y MySQL. Es un
-proyecto independiente de Vértice CR.
+Laboratorio académico de notas privadas. La aplicación está separada en dos
+carpetas: interfaz React con Vite en `frontend/` y API Node.js con Express y
+MySQL en `backend/`. Es independiente de Vértice CR.
 
-## Estado
+## Estructura
 
-El código incluye registro, sesiones, notas privadas, perfil y panel de
-administración. Las pruebas locales se ejecutaron con MySQL aislado; el
-despliegue completo, el envío real de correo y los análisis externos de
-seguridad aún deben verificarse. `/health` solo indica que el proceso responde.
+```text
+frontend/       React, Vite y estilos
+backend/        API, seguridad, scripts y migraciones MySQL
+docs/           investigación y documentación del laboratorio
+package.json    comandos y workspaces npm
+```
 
-## Uso local
+## Desarrollo local
 
-1. Instalar Node.js 24 y MySQL 8.
-2. Crear una base de datos independiente para el laboratorio.
-3. Copiar `.env.example` a `.env` y configurar los valores. Nunca subir
-   `.env`, contraseñas, llaves ni credenciales al repositorio.
-4. Ejecutar `npm ci` y `npm start`. El servidor crea sus tablas en la base
-   configurada y escucha el puerto definido por `PORT`.
+1. Instalá Node.js 24 y MySQL 8.
+2. Creá una base vacía para el laboratorio, por ejemplo `resguardo_dev`.
+3. Copiá `.env.example` a `.env` y completá `DATABASE_URL`, `SESSION_SECRET`
+   y `DATA_ENCRYPTION_KEY`. Conservá los valores secretos solo en `.env`.
+4. Instalá las dependencias con `npm ci`.
+5. Iniciá la API y Vite con `npm run dev`.
 
-`DATABASE_URL` tiene la forma `mysql://usuario:contraseña@host:puerto/base`;
-los caracteres especiales en usuario o contraseña se codifican para URL.
-`SESSION_SECRET` debe contener al menos 32 caracteres y
-`DATA_ENCRYPTION_KEY` debe ser una llave aleatoria de 32 bytes codificada en
-base64. Conservar la llave: si se pierde, los datos cifrados no se pueden leer.
-No compartirla junto a respaldos ni registrarla en consola pública.
+Vite queda en `http://localhost:5173`, Express en `http://localhost:3000` y
+las solicitudes `/api` se envían a Express durante el desarrollo. La primera
+vez que arranca la API, aplica en orden los archivos de `backend/migrations/`
+y registra cada versión en `schema_migrations`.
 
-La recuperación por correo requiere configurar SMTP y `MAIL_FROM`. Mientras no
-se configure un servicio real, la solicitud responde que no está disponible.
-`APP_BASE_URL` debe ser la URL pública HTTPS real en producción.
-`DATABASE_SSL=true` habilita TLS verificando el certificado; en Railway puede
-usarse la red privada interna, según la configuración real.
+En PowerShell podés crear el archivo local con:
 
-Para habilitar el primer administrador, registrar una cuenta y ejecutar
-`node scripts/crear-administrador.js correo-de-la-cuenta` en un entorno con
-acceso a la base y las variables configuradas. No existen administradores ni
-credenciales predeterminadas.
+```powershell
+Copy-Item .env.example .env
+```
 
-## Verificaciones
+`DATABASE_URL` tiene la forma
+`mysql://usuario:contraseña@host:puerto/base`; codificá para URL cualquier
+carácter especial en el usuario o la contraseña. `SESSION_SECRET` debe tener
+al menos 32 caracteres. `DATA_ENCRYPTION_KEY` debe ser una clave aleatoria de
+32 bytes en Base64; guardá una copia segura porque los datos cifrados dependen
+de ella.
 
-`npm run check` comprueba sintaxis. `npm test` exige `NODE_ENV=test`, un
-MySQL local independiente llamado `lab_test` y variables de prueba; no lo
-ejecutés contra datos reales. GitHub Actions propone un servicio temporal MySQL
-para correr esas pruebas y auditar dependencias. Railway debe configurarse para
-esperar a CI: agregar el flujo por sí solo no activa esa espera.
+## Compilar y servir
 
-El informe de seguridad y las pruebas en producción están en `docs/`; las
-evidencias no ejecutadas se identifican como pendientes.
+```sh
+npm run build
+npm start
+```
+
+Express sirve `frontend/dist` y expone `/health` para comprobar la respuesta
+del servicio. Railway usa el `package.json` de la raíz: el comando de
+compilación es `npm run build` y el de arranque es `npm start`.
+
+En Railway, conectá la rama `main` del repositorio y mantené el directorio raíz
+del servicio en `/`. La base se conecta mediante `DATABASE_URL`; no copiés su
+contraseña en el repositorio ni en el chat. En producción configurá también
+`APP_BASE_URL` con el dominio HTTPS de la aplicación, `NODE_ENV=production`,
+`SESSION_SECRET`, `DATA_ENCRYPTION_KEY` y `TRUST_PROXY=1`.
+
+La recuperación de contraseña envía correo solo cuando hay un SMTP completo
+configurado (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`,
+`SMTP_SECURE` y `MAIL_FROM`). Ethereal sirve para recibir mensajes de prueba;
+no es un proveedor de correo para cuentas reales.
+
+## Scripts
+
+| Comando | Uso |
+| --- | --- |
+| `npm run dev` | Inicia API y frontend en modo desarrollo |
+| `npm run check` | Comprueba la sintaxis del backend |
+| `npm run lint` | Ejecuta ESLint en ambos workspaces |
+| `npm run build` | Compila React para producción |
+| `npm test` | Ejecuta las pruebas de integración del backend |
+| `npm run audit` | Revisa vulnerabilidades conocidas de dependencias |
+
+Las pruebas de integración necesitan una base MySQL aislada (`lab_test`) y las
+variables de prueba. No las ejecutés sobre datos personales. GitHub Actions
+inicia MySQL temporal para las verificaciones automáticas.
+
+## Primer administrador
+
+Registrá primero una cuenta y luego ejecutá, en un entorno que tenga acceso a
+la base:
+
+```sh
+node backend/scripts/crear-administrador.js correo-de-la-cuenta
+```
+
+El repositorio no incluye cuentas ni contraseñas predeterminadas.

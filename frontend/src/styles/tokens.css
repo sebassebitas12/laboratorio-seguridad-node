@@ -1,0 +1,25 @@
+:root {
+  color-scheme: light;
+  --canvas: #f1eee6;
+  --surface: #fbfaf6;
+  --surface-muted: #e9e5da;
+  --ink: #1c2924;
+  --ink-soft: #41534a;
+  --muted: #727b73;
+  --line: #d2ccbd;
+  --line-strong: #a9a696;
+  --forest: #18382f;
+  --forest-dark: #102920;
+  --accent: #b94b2d;
+  --accent-soft: #ead5c7;
+  --error: #9a3429;
+  --error-bg: #f4e6df;
+  --success: #2d6246;
+  --success-bg: #e3eee6;
+  --sans: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+  --serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --mono: "IBM Plex Mono", "Cascadia Mono", Consolas, monospace;
+  --nav-width: 218px;
+  --library-width: 306px;
+  --focus: #c35b3d;
+}
